@@ -1,0 +1,6 @@
+/* example comment 1 */
+"Waiting_Room_Title" = "Join the waiting room of %@";
+"Waiting_Room_Button" = "Join waiting room";
+// example comment 2
+"Waiting_For_Acceptance_Description" = "Waiting for Provider acceptance";
+"Name_Required_Validation" = "The name is required if you want to join as a guest";
