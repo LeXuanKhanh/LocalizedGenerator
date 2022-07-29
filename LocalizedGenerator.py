@@ -19,6 +19,8 @@ def main():
     myfile = open('input.txt')
     myfileContent = ''
     for line in myfile:
+        if not line.strip():
+            continue
         item = TranslateContent(line)
         contents.append(item)
         myfileContent = myfileContent + line
