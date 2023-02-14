@@ -1,3 +1,4 @@
+from functools import partial, wraps
 from typing import List
 from TranslateContent import LANGUAGES, TranslateContent
 import os.path
@@ -8,7 +9,7 @@ contents: List[TranslateContent] = []
 iosOutputName = 'output_ios.txt'
 androidOutputName = 'output_android.txt'
 translateLanguages: List[str]= [
-    'id', 'th', 'hi', 'vi', 'es', 'tl',
+    "en",'id', 'th', 'hi', 'vi', 'es', 'tl',
     'bn', 'ur', 'zh-tw', 'ja'
 ]
  
@@ -28,7 +29,8 @@ async def main():
     print(myfileContent)
     print()
 
-    await beginTranslate()
+    #await beginTranslate()
+    await beginTranslateV2()
     writeFile('ios')
     writeFile('android')
 
@@ -49,7 +51,45 @@ async def beginTranslate():
                 translatingIndex += 1
             asyncWorks.append(beginTranslateItem(item=item, language=language))
     await asyncio.gather(*asyncWorks)
-    print()
+    print(f'done generating localized')
+    
+partitionSize = 20
+sleepTime = 5  #seconds
+async def beginTranslateV2():
+    global totalContentToTranslate
+    global translatedContentCount
+    
+    print(f'generating localized')
+    totalContentToTranslate = len(list(filter(lambda x: x.isComment == False,contents))) * len(translateLanguages)
+    translatedContentCount = 0
+    translatingIndex = 0
+    
+    asyncPartition = []
+    partitionCount = 0
+    for language in translateLanguages:
+        translatingIndex = 0
+        for (index, item) in enumerate(contents):
+            if (item.isComment != True):
+                translatingIndex += 1
+                partitionCount += 1
+            asyncPartition.append(beginTranslateItem(item=item, language=language))
+            
+            if (partitionCount == partitionSize):
+                print(f'begin translate current partition')
+                await asyncio.gather(*asyncPartition)
+                print()
+                asyncPartition = []
+                partitionCount = 0
+                print(f'start timeout sleeping')
+                await asyncSleep(sleepTime)
+                
+    if (partitionCount != 0):
+        print(f'begin translate remaining works')
+        await asyncio.gather(*asyncPartition)
+        print()
+        asyncPartition = []
+        partitionCount = 0
+    print(f'done generating localized')
         
 async def beginTranslateItem(item: TranslateContent, language: str):
     global translatedContentCount
@@ -78,6 +118,17 @@ def writeFile(platform: str):
             file.write(f'{result}\n')
         file.write('\n')
     file.close()
+    
+def async_wrap(func):
+    @wraps(func)
+    async def run(*args, loop=None, executor=None, **kwargs):
+        if loop is None:
+            loop = asyncio.get_event_loop()
+        pfunc = partial(func, *args, **kwargs)
+        return await loop.run_in_executor(executor, pfunc)
+    return run 
+
+asyncSleep = async_wrap(time.sleep)
         
 if __name__ == '__main__':
     start_time = time.perf_counter()
