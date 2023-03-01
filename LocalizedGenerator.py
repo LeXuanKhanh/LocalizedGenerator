@@ -1,6 +1,7 @@
 from functools import partial, wraps
 from typing import List
-from TranslateContent import LANGUAGES, TranslateContent
+from TranslateContent import TranslateContent
+from GGTransLanguage import GGTRANS_LANGUAGE
 import os.path
 import time
 import asyncio
@@ -10,7 +11,7 @@ iosOutputName = 'output_ios.txt'
 androidOutputName = 'output_android.txt'
 translateLanguages: List[str]= [
     "en",'id', 'th', 'hi', 'vi', 'es', 'tl',
-    'bn', 'ur', 'zh-tw', 'ja'
+    'bn', 'ur', 'zh-TW', 'ja'
 ]
  
 totalContentToTranslate = 0
@@ -53,8 +54,11 @@ async def beginTranslate():
     await asyncio.gather(*asyncWorks)
     print(f'done generating localized')
     
-partitionSize = 20
-sleepTime = 5  #seconds
+# determine translate works will execute asynchronously at the same time, minimum value is 1
+# if partitionSize is set to 1 then the translator will work synchronously   
+partitionSize = 50 
+# delay time between partition works in seconds to avoid timeout, if set to 0 then it will skip delay
+sleepTime = 0  
 async def beginTranslateV2():
     global totalContentToTranslate
     global translatedContentCount
@@ -80,8 +84,10 @@ async def beginTranslateV2():
                 print()
                 asyncPartition = []
                 partitionCount = 0
-                print(f'start timeout sleeping')
-                await asyncSleep(sleepTime)
+                
+                if (sleepTime != 0):
+                    print(f'start timeout sleeping in {sleepTime}')
+                    await asyncSleep(sleepTime)
                 
     if (partitionCount != 0):
         print(f'begin translate remaining works')
@@ -110,7 +116,7 @@ def writeFile(platform: str):
     translatingIndex = 0
     for language in translateLanguages:
         translatingIndex = 0
-        file.write(f'//{LANGUAGES[language]}\n')
+        file.write(f'//{GGTRANS_LANGUAGE[language]}\n')
         for (index, item) in enumerate(contents):
             if (item.isComment != True):
                 translatingIndex += 1

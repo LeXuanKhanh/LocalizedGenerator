@@ -1,9 +1,0 @@
-"Please enter your phone number" = "Please enter your phone number";
-"Conference_Call_Phone_Number_Need_Update" = "Please update your phone number before being able to dial it";
-"Conference_Call_Instruction" = "Your phone number is %@ \n Press the Dial button to receive a call from %@";
-"Conference_Call_Instruction_Anonymous_User" = "Press the Dial button to receive a call from %@";
-"Conference_Call_Request_Success" = "You should receive a call from %@";
-"Conference_Call_Instruction_Provider" = "Please keep this page open as you will need to end the session here";
-"Conference_Call_Instruction_Note" = "Participants can update their phone number to receive a call after a conference call has started";
-"Conference_Call_Participant_Button_Title" = "View phone number status";
-"Conference_Call_Notification_Title" = "This call has been switched over to be a conference call";

@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 output_android.txt
 output_ios.txt
+input.txt
