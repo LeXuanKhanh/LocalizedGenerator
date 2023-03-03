@@ -1,0 +1,23 @@
+{
+    "input_language": "en", 
+    "output_languages": [ "en","id", "th", "hi", "vi", "es", "tl",
+        "bn", "ur", "zh-TW", "ja"],
+    "input_file": "input.txt",
+    "output_ios_file": "output_ios.txt",
+    "output_android_file": "output_android.txt",
+    "partition_size": 50,
+    "sleep_time": 0,
+    "google_translator_config": {
+        "is_enabled": true
+    },
+    "microsoft_translator_config": {
+        "is_enabled": true,
+        "region": "southeastasia",
+        "keys": [
+            "1acf48b58c8845ffaeb26d50846c1b78"
+        ]
+    },
+    "mymemory_translator": {
+        "is_enabled": true
+    }
+}

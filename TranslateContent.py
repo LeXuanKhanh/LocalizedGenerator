@@ -5,6 +5,7 @@ from deep_translator import (GoogleTranslator,
                              MicrosoftTranslator,
                              MyMemoryTranslator)
 from GGTransLanguage import GGTRANS_LANGUAGE
+from GeneratorConfig import GeneratorConfig
 from MMTransLanguage import MMTRANS_LANGUAGE
 from MSTransLanguage import MSTRANS_LANGUAGE
 
@@ -14,9 +15,6 @@ class TranslateContent:
     isComment: bool = False
     translatedContentsIOS = dict()
     translatedContentsAndroid = dict()
-    
-    microsoftTranslatorKey: str = ""
-    microsoftTranslatorRegion: str = ""
     
     def __init__(self, line: str):
         self.translatedContentsIOS = dict()
@@ -94,8 +92,8 @@ class TranslateContent:
             
             msLanguage = MSTRANS_LANGUAGE[msKey]
             translator = MicrosoftTranslator(
-                api_key=self.microsoftTranslatorKey, 
-                region= self.microsoftTranslatorRegion, 
+                api_key=GeneratorConfig.shared().microsoftTranslatorKeys[0], 
+                region= GeneratorConfig.shared().microsoftTranslatorRegion, 
                 source="en", target=msLanguage)
             result = translator.translate(text=self.content)
             self.setResult(language, result)
@@ -116,7 +114,7 @@ class TranslateContent:
             return await loop.run_in_executor(executor, pfunc)
         return run 
         
-    translateAsync = async_wrap(translateWithGoogle)
+    translateAsync = async_wrap(translateWithMicrosoft)
     
     def resultContent(self, language: str, platform: str):
         if (self.isComment):

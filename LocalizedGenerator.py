@@ -1,5 +1,6 @@
 from functools import partial, wraps
 from typing import List
+from GeneratorConfig import GeneratorConfig
 from TranslateContent import TranslateContent
 from GGTransLanguage import GGTRANS_LANGUAGE
 import os.path
@@ -7,19 +8,14 @@ import time
 import asyncio
 
 contents: List[TranslateContent] = []
-iosOutputName = 'output_ios.txt'
-androidOutputName = 'output_android.txt'
-translateLanguages: List[str]= [
-    "en",'id', 'th', 'hi', 'vi', 'es', 'tl',
-    'bn', 'ur', 'zh-TW', 'ja'
-]
- 
 totalContentToTranslate = 0
 translatedContentCount = 0
     
 # ========= MAIN =========
 async def main():
-    myfile = open('input.txt')
+    GeneratorConfig.shared().loadFromJson()
+    
+    myfile = open(GeneratorConfig.shared().inputFile)
     myfileContent = ''
     for line in myfile:
         if not line.strip():
@@ -40,12 +36,12 @@ async def beginTranslate():
     global translatedContentCount
     
     print(f'generating localized')
-    totalContentToTranslate = len(list(filter(lambda x: x.isComment == False,contents))) * len(translateLanguages)
+    totalContentToTranslate = len(list(filter(lambda x: x.isComment == False,contents))) * len(GeneratorConfig.shared().outputLanguages)
     translatedContentCount = 0
     
     asyncWorks = []
     translatingIndex = 0
-    for language in translateLanguages:
+    for language in GeneratorConfig.shared().outputLanguages:
         translatingIndex = 0
         for (index, item) in enumerate(contents):
             if (item.isComment != True):
@@ -54,23 +50,18 @@ async def beginTranslate():
     await asyncio.gather(*asyncWorks)
     print(f'done generating localized')
     
-# determine translate works will execute asynchronously at the same time, minimum value is 1
-# if partitionSize is set to 1 then the translator will work synchronously   
-partitionSize = 50 
-# delay time between partition works in seconds to avoid timeout, if set to 0 then it will skip delay
-sleepTime = 0  
 async def beginTranslateV2():
     global totalContentToTranslate
     global translatedContentCount
     
     print(f'generating localized')
-    totalContentToTranslate = len(list(filter(lambda x: x.isComment == False,contents))) * len(translateLanguages)
+    totalContentToTranslate = len(list(filter(lambda x: x.isComment == False,contents))) * len(GeneratorConfig.shared().outputLanguages)
     translatedContentCount = 0
     translatingIndex = 0
     
     asyncPartition = []
     partitionCount = 0
-    for language in translateLanguages:
+    for language in GeneratorConfig.shared().outputLanguages:
         translatingIndex = 0
         for (index, item) in enumerate(contents):
             if (item.isComment != True):
@@ -78,16 +69,16 @@ async def beginTranslateV2():
                 partitionCount += 1
             asyncPartition.append(beginTranslateItem(item=item, language=language))
             
-            if (partitionCount == partitionSize):
+            if (partitionCount == GeneratorConfig.shared().partitionSize):
                 print(f'begin translate current partition')
                 await asyncio.gather(*asyncPartition)
                 print()
                 asyncPartition = []
                 partitionCount = 0
                 
-                if (sleepTime != 0):
-                    print(f'start timeout sleeping in {sleepTime}')
-                    await asyncSleep(sleepTime)
+                if (GeneratorConfig.shared().sleepTime != 0):
+                    print(f'start timeout sleeping in {GeneratorConfig.shared().sleepTime}')
+                    await asyncSleep(GeneratorConfig.shared().sleepTime)
                 
     if (partitionCount != 0):
         print(f'begin translate remaining works')
@@ -105,7 +96,7 @@ async def beginTranslateItem(item: TranslateContent, language: str):
         print(f"translated {translatedContentCount}/{totalContentToTranslate}", end='\r')
     
 def writeFile(platform: str):
-    filePath = iosOutputName if platform == "ios" else androidOutputName
+    filePath = GeneratorConfig.shared().outputIOSFile if platform == "ios" else GeneratorConfig.shared().outputAndroidFile
     permission = os.path.exists(filePath) and 'w' or 'x'
     if permission == 'w':
         file = open(filePath, permission)
@@ -114,7 +105,7 @@ def writeFile(platform: str):
     
     print(f'writing file for {platform} localized')
     translatingIndex = 0
-    for language in translateLanguages:
+    for language in GeneratorConfig.shared().outputLanguages:
         translatingIndex = 0
         file.write(f'//{GGTRANS_LANGUAGE[language]}\n')
         for (index, item) in enumerate(contents):

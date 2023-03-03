@@ -1,3 +1,4 @@
+# /Users/macbook/Library/Python/3.8/lib/python/site-packages/deep_translator/constants.py
 GGTRANS_LANGUAGE = {
   "af": "afrikaans",
   "sq": "albanian",
