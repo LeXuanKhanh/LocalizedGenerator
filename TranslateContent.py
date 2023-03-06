@@ -15,6 +15,7 @@ class TranslateContent:
     isComment: bool = False
     translatedContentsIOS = dict()
     translatedContentsAndroid = dict()
+    config = GeneratorConfig.shared()
     
     def __init__(self, line: str):
         self.translatedContentsIOS = dict()
@@ -92,14 +93,57 @@ class TranslateContent:
             
             msLanguage = MSTRANS_LANGUAGE[msKey]
             translator = MicrosoftTranslator(
-                api_key=GeneratorConfig.shared().microsoftTranslatorKeys[0], 
-                region= GeneratorConfig.shared().microsoftTranslatorRegion, 
+                api_key= self.config.microsoftTranslatorKeys[0], 
+                region= self.config.microsoftTranslatorRegion, 
                 source="en", target=msLanguage)
             result = translator.translate(text=self.content)
             self.setResult(language, result)
         except Exception as e:
             print(f"{type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}")
             print(f"error when tranlate to {language} try again with translator")
+            
+    def translateWithMicrosoftMultikeys(self, language: str):
+        if (self.isComment):
+            self.translatedContentsIOS[language] = self.key
+            self.translatedContentsAndroid[language] = self.key
+            return
+        
+        ggLanguage = GGTRANS_LANGUAGE[language].replace("(", '').replace(')', '').lower() # remove () for matching
+        msKey = ""
+            
+        #print("begin find")
+        # find equal language key in ms language
+        for key in MSTRANS_LANGUAGE:
+            #print(f"gg:{ggLanguage} ggL:{GGTRANS_LANGUAGE[language]} ms:{key} msL:{MSTRANS_LANGUAGE[msKey]}")
+            if (ggLanguage in key or key in ggLanguage or MSTRANS_LANGUAGE[key] == language):
+                msKey = key
+                break
+        #print("end find")    
+        
+        msLanguage = MSTRANS_LANGUAGE[msKey]
+        
+        for (index, itemKey) in enumerate(self.config.microsoftTranslatorKeys):
+            isSuccess = False
+            try: 
+                translator = MicrosoftTranslator(
+                api_key=itemKey, 
+                region= self.config.microsoftTranslatorRegion, 
+                source="en", target=msLanguage)
+                result = translator.translate(text=self.content)
+                self.setResult(language, result)
+                isSuccess = True
+                # print(f"TRANSLATE SUCCESSFUL MS key: {itemKey} when translate to {language} with content {self.content}")
+            except Exception as e:
+                nextIndex = index + 1 < len(self.config.microsoftTranslatorKeys) and index + 1 or -1
+                nextIndexDescription = nextIndex != -1 and f"try again with next key f{self.config.microsoftTranslatorKeys[nextIndex]}" or ""
+                # print(f"HANDLE ERROR: Error at MS key: {itemKey} when translate to {language} with content {self.content} ,{nextIndexDescription} \nDETAIL: {type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}\n")
+                print(f"HANDLE ERROR: Error at MS key: {itemKey}, {nextIndexDescription} \nDETAIL: {type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}\n")
+            if (isSuccess):
+                break
+
+    
+    def translateAdvanced(self, language: str):
+        return 
     
     def setResult(self, language: str, text: str):
         self.translatedContentsIOS[language] = f"\"{self.key}\" = \"{text}\";"
@@ -114,7 +158,7 @@ class TranslateContent:
             return await loop.run_in_executor(executor, pfunc)
         return run 
         
-    translateAsync = async_wrap(translateWithMicrosoft)
+    translateAsync = async_wrap(translateWithMicrosoftMultikeys)
     
     def resultContent(self, language: str, platform: str):
         if (self.isComment):

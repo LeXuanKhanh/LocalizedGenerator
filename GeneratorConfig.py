@@ -3,6 +3,7 @@ import time
 
 class GeneratorConfig:
     configFile = 'generator_config.json'
+    debugMode = False
     
     inputFile = "input.txt"
     outputIOSFile = "output_ios.txt"
@@ -45,6 +46,8 @@ class GeneratorConfig:
         data: dict() = json.load(f)
         #print(json.dumps(data, indent=2))
         f.close()
+        
+        self.debugMode = data["debug"]
         
         self.inputLanguage = data["input_language"]
         self.outputLanguages = data["output_languages"]

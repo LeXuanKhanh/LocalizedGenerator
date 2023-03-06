@@ -10,12 +10,13 @@ import asyncio
 contents: List[TranslateContent] = []
 totalContentToTranslate = 0
 translatedContentCount = 0
+config = GeneratorConfig.shared()
     
 # ========= MAIN =========
 async def main():
-    GeneratorConfig.shared().loadFromJson()
+    config.loadFromJson()
     
-    myfile = open(GeneratorConfig.shared().inputFile)
+    myfile = open(config.inputFile)
     myfileContent = ''
     for line in myfile:
         if not line.strip():
@@ -41,7 +42,7 @@ async def beginTranslate():
     
     asyncWorks = []
     translatingIndex = 0
-    for language in GeneratorConfig.shared().outputLanguages:
+    for language in config.outputLanguages:
         translatingIndex = 0
         for (index, item) in enumerate(contents):
             if (item.isComment != True):
@@ -61,7 +62,7 @@ async def beginTranslateV2():
     
     asyncPartition = []
     partitionCount = 0
-    for language in GeneratorConfig.shared().outputLanguages:
+    for language in config.outputLanguages:
         translatingIndex = 0
         for (index, item) in enumerate(contents):
             if (item.isComment != True):
@@ -69,7 +70,7 @@ async def beginTranslateV2():
                 partitionCount += 1
             asyncPartition.append(beginTranslateItem(item=item, language=language))
             
-            if (partitionCount == GeneratorConfig.shared().partitionSize):
+            if (partitionCount == config.partitionSize):
                 print(f'begin translate current partition')
                 await asyncio.gather(*asyncPartition)
                 print()
@@ -96,7 +97,7 @@ async def beginTranslateItem(item: TranslateContent, language: str):
         print(f"translated {translatedContentCount}/{totalContentToTranslate}", end='\r')
     
 def writeFile(platform: str):
-    filePath = GeneratorConfig.shared().outputIOSFile if platform == "ios" else GeneratorConfig.shared().outputAndroidFile
+    filePath = config.outputIOSFile if platform == "ios" else config.outputAndroidFile
     permission = os.path.exists(filePath) and 'w' or 'x'
     if permission == 'w':
         file = open(filePath, permission)
@@ -105,7 +106,7 @@ def writeFile(platform: str):
     
     print(f'writing file for {platform} localized')
     translatingIndex = 0
-    for language in GeneratorConfig.shared().outputLanguages:
+    for language in config.outputLanguages:
         translatingIndex = 0
         file.write(f'//{GGTRANS_LANGUAGE[language]}\n')
         for (index, item) in enumerate(contents):

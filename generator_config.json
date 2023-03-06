@@ -1,4 +1,5 @@
 {
+    "debug": false,
     "input_language": "en", 
     "output_languages": [ "en","id", "th", "hi", "vi", "es", "tl",
         "bn", "ur", "zh-TW", "ja"],
@@ -14,6 +15,10 @@
         "is_enabled": true,
         "region": "southeastasia",
         "keys": [
+            "1acf48b58c8845ffaeb26d50846c1b7",
+            "1acf48b58c8845ffaeb26d50846c1b",
+            "1acf48b58c8845ffaeb26d50846c1",
+            "1acf48b58c8845ffaeb26d50846c",
             "1acf48b58c8845ffaeb26d50846c1b78"
         ]
     },
