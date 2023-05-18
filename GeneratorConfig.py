@@ -26,6 +26,10 @@ class GeneratorConfig:
     microsoftTranslatorRegion = "southeastasia"
 
     isMymemoryTranslatorEnabled = True
+    
+    googleTransMaxErrorCount = 3
+    microsoftTransMaxErrorCount = 3
+    mymemoryTransMaxErrorCount = 3
 
     __instance = None
     @staticmethod 

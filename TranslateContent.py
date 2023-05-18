@@ -5,17 +5,29 @@ from deep_translator import (GoogleTranslator,
                              MicrosoftTranslator,
                              MyMemoryTranslator)
 from GGTransLanguage import GGTRANS_LANGUAGE
-from GeneratorConfig import GeneratorConfig
 from MMTransLanguage import MMTRANS_LANGUAGE
 from MSTransLanguage import MSTRANS_LANGUAGE
+from GeneratorConfig import GeneratorConfig
+from TranslatorErrorCounter import TranslatorErrorCounter
 
 class TranslateContent:
+    GOOGLE_TRANSLATOR = 0
+    MICROSOFT_TRANSLATOR = 1
+    MYMEMORY_TRANSLATOR = 2
+    
+    AVANCED_TRANSLATOR_ORDER= [
+        MYMEMORY_TRANSLATOR,
+        GOOGLE_TRANSLATOR,
+        MICROSOFT_TRANSLATOR,
+    ]
+    
     key: str = ''
     content: str = ''
     isComment: bool = False
     translatedContentsIOS = dict()
     translatedContentsAndroid = dict()
     config = GeneratorConfig.shared()
+    errorCounter = TranslatorErrorCounter.shared()
     
     def __init__(self, line: str):
         self.translatedContentsIOS = dict()
@@ -45,6 +57,7 @@ class TranslateContent:
             result = translator.translate(text=self.content)
             self.setResult(language, result)
         except Exception as e:
+            self.errorCounter.googleTrans += 1
             print(f"{type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}")
             print("try again with translator")
           
@@ -68,6 +81,7 @@ class TranslateContent:
             result = translator.translate(text=self.content)
             self.setResult(language, result)
         except Exception as e:
+            self.errorCounter.mymemoryTrans += 1
             print(f"{type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}")
             print("try again with translator")
             
@@ -99,6 +113,7 @@ class TranslateContent:
             result = translator.translate(text=self.content)
             self.setResult(language, result)
         except Exception as e:
+            self.errorCounter.microsoftTrans += 1
             print(f"{type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}")
             print(f"error when tranlate to {language} try again with translator")
             
@@ -122,6 +137,7 @@ class TranslateContent:
         
         msLanguage = MSTRANS_LANGUAGE[msKey]
         
+        isAllKeysGetError = True
         for (index, itemKey) in enumerate(self.config.microsoftTranslatorKeys):
             isSuccess = False
             try: 
@@ -139,11 +155,33 @@ class TranslateContent:
                 # print(f"HANDLE ERROR: Error at MS key: {itemKey} when translate to {language} with content {self.content} ,{nextIndexDescription} \nDETAIL: {type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}\n")
                 print(f"HANDLE ERROR: Error at MS key: {itemKey}, {nextIndexDescription} \nDETAIL: {type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}\n")
             if (isSuccess):
+                isAllKeysGetError = False
                 break
-
+            
+        if isAllKeysGetError:
+            self.errorCounter.microsoftTrans += 1
     
     def translateAdvanced(self, language: str):
-        return 
+        allTranslatorGetError = True
+        for translatorType in self.AVANCED_TRANSLATOR_ORDER:
+            if (translatorType == self.GOOGLE_TRANSLATOR and 
+                (not self.errorCounter.isGoogleErrorReachedMaxLimit())):
+                self.translateWithGoogle(language)
+                allTranslatorGetError = False
+        
+            elif (translatorType == self.MICROSOFT_TRANSLATOR and 
+                (not self.errorCounter.isMicrosoftErrorReachedMaxLimit())):
+                self.translateWithMicrosoft(language)
+                allTranslatorGetError = False
+                
+            elif (translatorType == self.MYMEMORY_TRANSLATOR and 
+                (not self.errorCounter.isMymemoryErrorReachedMaxLimit())):
+                self.translateWithMymemory(language)
+                allTranslatorGetError = False
+                
+        if (allTranslatorGetError): 
+            print(f"HANDLE ERROR: all translator get error when translate {self.content} into {language}")
+        
     
     def setResult(self, language: str, text: str):
         self.translatedContentsIOS[language] = f"\"{self.key}\" = \"{text}\";"
@@ -158,7 +196,11 @@ class TranslateContent:
             return await loop.run_in_executor(executor, pfunc)
         return run 
         
-    translateAsync = async_wrap(translateWithMicrosoftMultikeys)
+    translateAsync = async_wrap(translateWithGoogle)
+    translateGGAsync = async_wrap(translateWithGoogle) 
+    translateMSAsync = async_wrap(translateWithMicrosoft)
+    translateMMAsync = async_wrap(translateWithMymemory)
+    translateAdvancedAsync = async_wrap(translateAdvanced)
     
     def resultContent(self, language: str, platform: str):
         if (self.isComment):
