@@ -15,7 +15,7 @@ class TranslateContent:
     MICROSOFT_TRANSLATOR = 1
     MYMEMORY_TRANSLATOR = 2
     
-    AVANCED_TRANSLATOR_ORDER= [
+    ADVANCED_TRANSLATOR_ORDER= [
         MYMEMORY_TRANSLATOR,
         GOOGLE_TRANSLATOR,
         MICROSOFT_TRANSLATOR,
@@ -163,7 +163,7 @@ class TranslateContent:
     
     def translateAdvanced(self, language: str):
         allTranslatorGetError = True
-        for translatorType in self.AVANCED_TRANSLATOR_ORDER:
+        for translatorType in self.ADVANCED_TRANSLATOR_ORDER:
             if (translatorType == self.GOOGLE_TRANSLATOR and 
                 (not self.errorCounter.isGoogleErrorReachedMaxLimit())):
                 self.translateWithGoogle(language)
