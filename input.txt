@@ -1,2 +1,0 @@
-// nane in personal profile
-"Preferred_Name" = "Preferred Name";

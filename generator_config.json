@@ -1,0 +1,61 @@
+{
+    "debug": false,
+    "input_language": "en", 
+    "output_languages": [ 
+        "en",
+        "ja",
+        "vi"
+    ],
+    "input_file": "input.txt",
+    "output_ios_file": "output_ios.txt",
+    "output_android_file": "output_android.txt",
+    "partition_size": 50,
+    "sleep_time": 0,
+    "google_translator_config": {
+        "is_enabled": true
+    },
+    "microsoft_translator_config": {
+        "is_enabled": true,
+        "region": "southeastasia",
+        "keys": [
+            "52af9a8079684e9589bd3"
+        ]
+    },
+    "mymemory_translator": {
+        "is_enabled": true
+    },
+    "is_modifying_existing_localized_files_ios": false,
+    "is_modifying_existing_localized_files_android": false,
+    "output_modify_files_ios": [
+        {
+            "language": "en",
+            "paths": [
+                "/Users/macbookpro/Documents/Default/Base.lproj/Localizable.strings",
+                "/Users/macbookpro/Documents/Default/en.lproj/Localizable.strings"
+            ]
+        },
+        {
+            "language": "ja",
+            "paths": ["/Users/macbookpro/Documents/Default/ja-JP.lproj/Localizable.strings"]
+        },
+        {
+            "language": "vi",
+            "paths": ["/Users/macbookpro/Documents/Default/vi.lproj/Localizable.strings"]
+        }
+    ],
+    
+    "output_modify_files_android": [
+        {
+            "language": "en",
+            "paths": ["/Users/macbookpro/Documents/project-android/src/main/res/values/strings.xml"]
+        },
+        {
+            "language": "ja",
+            "paths": ["/Users/macbookpro/Documents/project-android/src/main/res/values-ja/strings.xml"]
+        },
+        {
+            "language": "vi",
+            "paths": ["/Users/macbookpro/Documents/project-android/src/main/res/values-vi/strings.xml"]
+        }
+    ]
+}
