@@ -1,6 +1,7 @@
 import json
 import time
 
+from OutputModifyFile import OutputModifyFile
 class GeneratorConfig:
     configFile = 'generator_config.json'
     debugMode = False
@@ -30,6 +31,12 @@ class GeneratorConfig:
     googleTransMaxErrorCount = 3
     microsoftTransMaxErrorCount = 3
     mymemoryTransMaxErrorCount = 3
+    
+    # when enable mofify existing files feature, all the files declare in the json config must be the same order 
+    # and the same amount of the declared output languages
+    isModifyingExistingLocalizedFiles = False
+    outputModifyFilesIOS: list[OutputModifyFile] = []
+    outputModifyFilesAndroid: list[OutputModifyFile] = []
 
     __instance = None
     @staticmethod 
@@ -70,15 +77,46 @@ class GeneratorConfig:
         self.microsoftTranslatorRegion = data["microsoft_translator_config"]["region"]
 
         self.isMymemoryTranslatorEnabled = data["mymemory_translator"]["is_enabled"]
+        
+        self.isModifyingExistingLocalizedFiles = data["is_modifying_existing_localized_files"]
+        
+        for item in data["output_modify_files_ios"]:
+            outputModifyFile = OutputModifyFile(item)
+            self.outputModifyFilesIOS.append(outputModifyFile)
+            
+        for item in data["output_modify_files_android"]:
+            outputModifyFile = OutputModifyFile(item)
+            self.outputModifyFilesAndroid.append(outputModifyFile)
+        
+        # validating 
+        if self.isModifyingExistingLocalizedFiles:
+            if (len(self.outputLanguages) != len(self.outputModifyFilesIOS) or 
+                len(self.outputLanguages) != len(self.outputModifyFilesAndroid)):
+                print(f"the amount of outputModifyIOSFiles {len(self.outputModifyFilesIOS)} " + 
+                      f"or outputModifyAndroidFiles {len(self.outputModifyFilesAndroid)} " +
+                      f"is not the same as outputLanguages {len(self.outputLanguages)}")
+                exit(1)
+                
+def testReadFile():
+    return
 
 # test        
-# def main():
-#     GeneratorConfig.shared().loadFromJson()
-#     attrs: dict = vars(GeneratorConfig.shared())
-#     print(json.dumps(attrs, indent=2))
+def main():
+    GeneratorConfig.shared().loadFromJson()
+    attrs: dict = vars(GeneratorConfig.shared())
+    print(json.dumps(attrs, indent=2))
+    print("outputModifyFilesIOS:")
+    for item in GeneratorConfig.shared().outputModifyFilesIOS:
+        js = vars(item)
+        print(json.dumps(js, indent=2))
+        
+    print("outputModifyFilesAndroid:")
+    for item in GeneratorConfig.shared().outputModifyFilesAndroid:
+        js = vars(item)
+        print(json.dumps(js, indent=2))
 
-# if __name__ == '__main__':
-#     start_time = time.perf_counter()
-#     main()
-#     end_time = time.perf_counter()
-#     print(f'executed in {end_time - start_time}s')
+if __name__ == '__main__':
+    start_time = time.perf_counter()
+    main()
+    end_time = time.perf_counter()
+    print(f'executed in {end_time - start_time}s')

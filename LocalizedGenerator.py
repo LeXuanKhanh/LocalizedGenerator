@@ -6,6 +6,7 @@ from GGTransLanguage import GGTRANS_LANGUAGE
 import os.path
 import time
 import asyncio
+import io
 
 contents: List[TranslateContent] = []
 totalContentToTranslate = 0
@@ -27,29 +28,14 @@ async def main():
     print(myfileContent)
     print()
 
-    #await beginTranslate()
     await beginTranslateV2()
-    writeFile('ios')
-    writeFile('android')
-
-async def beginTranslate():
-    global totalContentToTranslate
-    global translatedContentCount
     
-    print(f'generating localized')
-    totalContentToTranslate = len(list(filter(lambda x: x.isComment == False,contents))) * len(GeneratorConfig.shared().outputLanguages)
-    translatedContentCount = 0
-    
-    asyncWorks = []
-    translatingIndex = 0
-    for language in config.outputLanguages:
-        translatingIndex = 0
-        for (index, item) in enumerate(contents):
-            if (item.isComment != True):
-                translatingIndex += 1
-            asyncWorks.append(beginTranslateItem(item=item, language=language))
-    await asyncio.gather(*asyncWorks)
-    print(f'done generating localized')
+    if config.isModifyingExistingLocalizedFiles:
+        modifyExistingFiles('ios')
+        modifyExistingFiles('android')
+    else:
+        writeFile('ios')
+        writeFile('android')
     
 async def beginTranslateV2():
     global totalContentToTranslate
@@ -117,6 +103,37 @@ def writeFile(platform: str):
         file.write('\n')
     file.close()
     
+def modifyExistingFiles(platform: str):
+    for (index, language) in  enumerate(config.outputLanguages):
+        filePaths: list[str] = config.outputModifyFilesIOS[index].paths
+        if (platform == "android"):
+            filePaths: list[str] = config.outputModifyFilesAndroid[index].paths
+        
+        for filePath in filePaths:
+            if not os.path.exists(filePath):
+                print(f"{filePath} doesn't exist")
+                exit(1)
+            file = open(filePath, "rb+")
+            file.seek(0, io.SEEK_END)
+            if platform == "android":
+                try:  # catch OSError in case of a one line file
+                    file.seek(-len('</resources>'.encode('utf8'))-1, io.SEEK_CUR)
+                except IOError:
+                    pass
+            else:
+                file.write('\n'.encode('utf8'))
+                
+            translatingIndex = 0
+            for (index, item) in enumerate(contents):
+                if (item.isComment != True):
+                    translatingIndex += 1
+                result = item.resultContent(language=language, platform=platform)
+                file.write(f'{result}\n'.encode('utf8'))
+                
+            if platform == "android":
+                file.write('</resources>'.encode('utf8'))
+            file.close()
+        
 def async_wrap(func):
     @wraps(func)
     async def run(*args, loop=None, executor=None, **kwargs):
