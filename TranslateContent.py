@@ -182,6 +182,13 @@ class TranslateContent:
         if (allTranslatorGetError): 
             print(f"HANDLE ERROR: all translator get error when translate {self.content} into {language}")
         
+    def translate(self, language: str):
+        if self.config.isGoogleTranslatorEnabled:
+            return self.translateWithGoogle(language)
+        if self.config.isMicrosoftTranslatorEnabled:
+            return self.translateWithMicrosoft(language) 
+        if self.config.isMymemoryTranslatorEnabled:
+            return self.translateWithMymemory(language)  
     
     def setResult(self, language: str, text: str):
         self.translatedContentsIOS[language] = f"\"{self.key}\" = \"{text}\";"
@@ -196,10 +203,11 @@ class TranslateContent:
             return await loop.run_in_executor(executor, pfunc)
         return run 
         
-    translateAsync = async_wrap(translateWithGoogle)
+    translateAsync = async_wrap(translate)
     translateGGAsync = async_wrap(translateWithGoogle) 
     translateMSAsync = async_wrap(translateWithMicrosoft)
     translateMMAsync = async_wrap(translateWithMymemory)
+    # exprimental
     translateAdvancedAsync = async_wrap(translateAdvanced)
     
     def resultContent(self, language: str, platform: str):

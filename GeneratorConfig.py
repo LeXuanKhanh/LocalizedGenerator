@@ -34,7 +34,8 @@ class GeneratorConfig:
     
     # when enable mofify existing files feature, all the files declare in the json config must be the same order 
     # and the same amount of the declared output languages
-    isModifyingExistingLocalizedFiles = False
+    isModifyingExistingLocalizedFilesIOS = False
+    isModifyingExistingLocalizedFilesAndroid = False
     outputModifyFilesIOS: list[OutputModifyFile] = []
     outputModifyFilesAndroid: list[OutputModifyFile] = []
 
@@ -78,7 +79,8 @@ class GeneratorConfig:
 
         self.isMymemoryTranslatorEnabled = data["mymemory_translator"]["is_enabled"]
         
-        self.isModifyingExistingLocalizedFiles = data["is_modifying_existing_localized_files"]
+        self.isModifyingExistingLocalizedFilesIOS = data["is_modifying_existing_localized_files_ios"]
+        self.isModifyingExistingLocalizedFilesAndroid = data["is_modifying_existing_localized_files_android"]
         
         for item in data["output_modify_files_ios"]:
             outputModifyFile = OutputModifyFile(item)
@@ -89,16 +91,21 @@ class GeneratorConfig:
             self.outputModifyFilesAndroid.append(outputModifyFile)
         
         # validating 
-        if self.isModifyingExistingLocalizedFiles:
-            if (len(self.outputLanguages) != len(self.outputModifyFilesIOS) or 
-                len(self.outputLanguages) != len(self.outputModifyFilesAndroid)):
-                print(f"the amount of outputModifyIOSFiles {len(self.outputModifyFilesIOS)} " + 
-                      f"or outputModifyAndroidFiles {len(self.outputModifyFilesAndroid)} " +
+        if (self.isModifyingExistingLocalizedFilesIOS and len(self.outputLanguages) != len(self.outputModifyFilesIOS)):
+                print(f"the amount of outputModifyIOSFiles {len(self.outputModifyFilesIOS)} "
                       f"is not the same as outputLanguages {len(self.outputLanguages)}")
                 exit(1)
-                
-def testReadFile():
-    return
+        if (self.isModifyingExistingLocalizedFilesAndroid and len(self.outputLanguages) != len(self.outputModifyFilesAndroid)):
+                print(f"or outputModifyAndroidFiles {len(self.outputModifyFilesAndroid)} " +
+                      f"is not the same as outputLanguages {len(self.outputLanguages)}")
+                exit(1)        
+    def translatorUsed(self):
+        if self.isGoogleTranslatorEnabled:
+            return 'GoogleTranslator'
+        if self.isMicrosoftTranslatorEnabled:
+            return 'MicrosoftTranslator'   
+        if self.isMymemoryTranslatorEnabled:
+            return 'MymemoryTranslator'            
 
 # test        
 def main():

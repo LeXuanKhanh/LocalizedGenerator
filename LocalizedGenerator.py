@@ -30,18 +30,21 @@ async def main():
 
     await beginTranslateV2()
     
-    if config.isModifyingExistingLocalizedFiles:
+    if config.isModifyingExistingLocalizedFilesIOS:
         modifyExistingFiles('ios')
-        modifyExistingFiles('android')
     else:
         writeFile('ios')
+        
+    if config.isModifyingExistingLocalizedFilesAndroid:
+        modifyExistingFiles('android')
+    else:
         writeFile('android')
     
 async def beginTranslateV2():
     global totalContentToTranslate
     global translatedContentCount
     
-    print(f'generating localized')
+    print(f'generating localized using {config.translatorUsed()}')
     totalContentToTranslate = len(list(filter(lambda x: x.isComment == False,contents))) * len(GeneratorConfig.shared().outputLanguages)
     translatedContentCount = 0
     translatingIndex = 0
@@ -104,6 +107,7 @@ def writeFile(platform: str):
     file.close()
     
 def modifyExistingFiles(platform: str):
+    print(f'modifying existing files for {platform} localized')
     for (index, language) in  enumerate(config.outputLanguages):
         filePaths: list[str] = config.outputModifyFilesIOS[index].paths
         if (platform == "android"):

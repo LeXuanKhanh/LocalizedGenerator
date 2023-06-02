@@ -24,7 +24,8 @@
     "mymemory_translator": {
         "is_enabled": true
     },
-    "is_modifying_existing_localized_files": true,
+    "is_modifying_existing_localized_files_ios": false,
+    "is_modifying_existing_localized_files_android": false,
     "output_modify_files_ios": [
         {
             "language": "en",
