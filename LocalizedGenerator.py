@@ -109,7 +109,6 @@ def writeFile(platform: str):
 def modifyExistingFiles(platform: str):
     print(f'modifying existing files for {platform} localized')
     for (index, language) in  enumerate(config.outputLanguages):
-        print(f"language {language}")
         filePaths: list[str]
         if (platform == "android"):
             filePaths: list[str] = config.outputModifyFilesAndroid[index].paths
@@ -135,7 +134,7 @@ def modifyExistingFiles(platform: str):
                 if (item.isComment != True):
                     translatingIndex += 1
                 result = item.resultContent(language=language, platform=platform)
-                file.write(f'{result}\n'.encode('utf8'))
+                file.write(f'    {result}\n'.encode('utf8'))
                 
             if platform == "android":
                 file.write('</resources>'.encode('utf8'))
