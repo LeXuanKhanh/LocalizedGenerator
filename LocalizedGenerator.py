@@ -109,10 +109,13 @@ def writeFile(platform: str):
 def modifyExistingFiles(platform: str):
     print(f'modifying existing files for {platform} localized')
     for (index, language) in  enumerate(config.outputLanguages):
-        filePaths: list[str] = config.outputModifyFilesIOS[index].paths
+        print(f"language {language}")
+        filePaths: list[str]
         if (platform == "android"):
             filePaths: list[str] = config.outputModifyFilesAndroid[index].paths
-        
+        else:
+            filePaths: list[str] = config.outputModifyFilesIOS[index].paths
+            
         for filePath in filePaths:
             if not os.path.exists(filePath):
                 print(f"{filePath} doesn't exist")
