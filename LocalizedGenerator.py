@@ -123,7 +123,7 @@ def modifyExistingFiles(platform: str):
             file.seek(0, io.SEEK_END)
             if platform == "android":
                 try:  # catch OSError in case of a one line file
-                    file.seek(-len('</resources>'.encode('utf8'))-1, io.SEEK_CUR)
+                    file.seek(-len('</resources>'.encode('utf8')), io.SEEK_CUR)
                 except IOError:
                     pass
             else:
