@@ -41,7 +41,7 @@ Define the `"input_language"` and `"output_languages"` codes. The code is ISO-63
 
 Defile the `"output_ios_file"` path and `"output_android_file"` path
 
-Run the script, assuming the `"is_modifying_existing_localized_files_ios"` and `"is_modifying_existing_localized_files_android"` is set to false, it will generate ios output file in ios strings resources format and android output file in xml format in your defined output file paths
+Run the `LocalizedGenerator.py` file, assuming the `"is_modifying_existing_localized_files_ios"` and `"is_modifying_existing_localized_files_android"` is set to false, it will generate ios output file in ios strings resources format and android output file in xml format in your defined output file paths
 
 ## Using different translators
 
