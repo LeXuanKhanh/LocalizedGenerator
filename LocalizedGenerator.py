@@ -127,14 +127,17 @@ def modifyExistingFiles(platform: str):
                 except IOError:
                     pass
             else:
-                file.write('\n'.encode('utf8'))
+                pass #file.write('\n'.encode('utf8'))
                 
             translatingIndex = 0
             for (index, item) in enumerate(contents):
                 if (item.isComment != True):
                     translatingIndex += 1
                 result = item.resultContent(language=language, platform=platform)
-                file.write(f'    {result}\n'.encode('utf8'))
+                if platform == "android":
+                    file.write(f'    {result}\n'.encode('utf8'))
+                else:
+                    file.write(f'{result}\n'.encode('utf8'))
                 
             if platform == "android":
                 file.write('</resources>'.encode('utf8'))
